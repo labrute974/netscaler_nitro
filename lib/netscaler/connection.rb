@@ -26,8 +26,6 @@ module Netscaler
       @session_id = JSON.parse(response)["sessionid"]
    end
 
-   private
-   
    def post(payload = {})
       begin
         response = RestClient.post @base_url + "/config", "object=#{payload.to_json}", :content_type => @content_type, :accept => "json"
