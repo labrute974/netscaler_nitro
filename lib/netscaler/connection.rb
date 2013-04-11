@@ -35,6 +35,26 @@ module Netscaler
       return @sessionid
     end
 
+    def get(type)
+      begin
+        response = RestClient.get @base_url + '/' + type, @postheaders
+      rescue => e
+        puts e.message
+        puts e.backtrace.inspect
+        return false
+      end
+
+      resphash = JSON.parse response
+      if resphash["errorcode"] != 0
+        @error_message = resphash['message']
+        retvalue = false
+      else
+        @error_message = nil
+        retvalue = resphash
+      end
+      return retvalue
+    end
+    
     def post(payload = {})
       begin
         response = RestClient.post @base_url, "object=#{payload.to_json}", @postheaders
