@@ -1,0 +1,10 @@
+require 'autotest/clear'
+
+# filter out VCS files and other garbage to reduce HDD usage
+Autotest.add_hook :initialize do |autotest|
+  %w{.git .svn .hg .DS_Store ._* vendor tmp log doc}.each do |exception|
+    autotest.add_exception(exception)
+  end
+end
+
+Autotest::Clear.clear_terminal = true
