@@ -3,7 +3,7 @@ require 'json'
 
 module Netscaler
   class Connection
-    attr_reader :hostname, :session_id
+    attr_reader :hostname, :sessionid, :error_message
 
     def initialize(options = {})
       raise ArgumentError unless options.is_a? Hash
@@ -14,28 +14,61 @@ module Netscaler
       @password = options["password"]
       @hostname = options["hostname"]
 
-      @base_url = "http://#{@hostname}/nitro/v1"
+      @base_url = "http://#{@hostname}/nitro/v1/config"
       @content_type = "application/x-www-form-urlencoded"
-      @session_id = nil
+      @sessionid = nil
+      @error_message = nil
+      @postheaders = { :content_type => @content_type, :cookie => "sessionid=#{@sessionid}", :accept => :json}
     end
     
     def login
-      payload = { "login" => { "username" => @username, "password" => @password }}
+      if @sessionid.nil? 
+        payload = { "login" => { "username" => @username, "password" => @password }}
 
-      response = post payload
-      @session_id = JSON.parse(response)["sessionid"]
-   end
+        response = post payload
+        if response
+          @sessionid = response["sessionid"]
+          @postheaders[:cookie] = "sessionid=#{@sessionid}"
+        end
+      end
+      
+      return @sessionid
+    end
 
-   def post(payload = {})
+    def post(payload = {})
       begin
-        response = RestClient.post @base_url + "/config", "object=#{payload.to_json}", :content_type => @content_type, :accept => "json"
+        response = RestClient.post @base_url, "object=#{payload.to_json}", @postheaders
       rescue => e
         puts e.message
         puts e.backtrace.inspect
         return false
       end
 
-      return response
+      resphash = JSON.parse response
+      if resphash["errorcode"] != 0
+        @error_message = resphash['message']
+        retvalue = false
+      else
+        @error_message = nil
+        retvalue = resphash
+      end
+
+      return retvalue
+    end
+
+    def logout
+      unless @sessionid.nil?
+        payload = { "logout" => {}} 
+
+        response = post payload
+        @sessionid = nil if response 
+      end
+
+      return @sessionid.nil?
+    end
+
+    def logged_in?
+      return ! @sessionid.nil?
     end
   end
 end
