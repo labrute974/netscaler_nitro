@@ -11,7 +11,7 @@ class WebHTTPMock
   def self.get_all
     stub_request( :get, "http://10.0.0.1/nitro/v1/config/server").
         with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/x-www-form-urlencoded', 'Cookie' => "sessionid=##CCD41760A2B71E88E029BC33F00E9C24704E71821EB86BD9A3AD2E5005C5"}).
-        to_return({ :body => '{"errorcode": 0, "message": "Done", "server": [] }', :status => 200, :headers => {'Content-Type' => 'application/json' }})
+        to_return({ :body => '{"errorcode": 0, "message": "Done", "server": [{"name": "srv1", "ipaddress": "1.1.1.1", "state": "ENABLED"}, {"name": "srv2", "ipaddress": "2.2.2.2", "state": "DISABLED"}] }', :status => 200, :headers => {'Content-Type' => 'application/json' }})
   end
 end
 
@@ -33,6 +33,11 @@ describe Netscaler::Server do
   end
 
   describe "#self.get" do
+    context "when server exists" do
+    end
+    
+    context "when server does not exist" do
+    end
   end
   
   describe "#self.find_by_name" do
