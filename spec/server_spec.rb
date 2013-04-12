@@ -32,16 +32,16 @@ describe Netscaler::Server do
   end
   
   describe "#self.get_all" do
-    it "should return an array" do
+    specify do
       WebHTTPMock.get_all
       Netscaler::Server.get_all(connection).should be_an_instance_of Array
     end
   end
 
   describe "#self.get" do
-    it "should return an array" do
+    specify do
       WebHTTPMock.get
-      Netscaler::Server.get(connection).should be_an_instance_of Array
+      Netscaler::Server.get(connection, "srv1").should be_an_instance_of Netscaler::Server
     end
   end
   
