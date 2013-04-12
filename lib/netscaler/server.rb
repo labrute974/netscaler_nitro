@@ -25,7 +25,7 @@ module Netscaler
       Server.disable()
     end
     
-    def self.get(nitro, name)
+    def self.find_by_name(nitro, name)
       response = nitro.get(@@type + '/' + name)
 
       response = response[@@type] if response
@@ -58,15 +58,23 @@ module Netscaler
       return objects
     end
     
-    def self.find_by_ip(nitro, ip = "")
-      #code
+    def self.find_by_ip(nitro, ip)
+      objects = get_all(nitro)
+      object = nil
+      
+      if objects
+        objects.each do |obj|
+          if obj.ipaddress == ip
+            object = obj
+            break
+          end
+        end
+      end
+      
+      return object
     end
     
-    def self.find_by_name(nitro, partial_name = "")
-      #code
-    end
-    
-    def self.disable(nitro, name = "")
+    def self.disable(nitro, name)
       #code
     end
   end
