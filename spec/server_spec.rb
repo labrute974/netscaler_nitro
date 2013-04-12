@@ -13,13 +13,19 @@ class WebHTTPMock
         with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/x-www-form-urlencoded', 'Cookie' => "sessionid=##CCD41760A2B71E88E029BC33F00E9C24704E71821EB86BD9A3AD2E5005C5"}).
         to_return({ :body => '{"errorcode": 0, "message": "Done", "server": [{"name": "srv1", "ipaddress": "1.1.1.1", "state": "ENABLED"}, {"name": "srv2", "ipaddress": "2.2.2.2", "state": "DISABLED"}] }', :status => 200, :headers => {'Content-Type' => 'application/json' }})
   end
+  
+  def self.get
+    stub_request( :get, "http://10.0.0.1/nitro/v1/config/server/srv1").
+        with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/x-www-form-urlencoded', 'Cookie' => "sessionid=##CCD41760A2B71E88E029BC33F00E9C24704E71821EB86BD9A3AD2E5005C5"}).
+        to_return({ :body => '{"errorcode": 0, "message": "Done", "server": [{"name": "srv1", "ipaddress": "1.1.1.1", "state": "ENABLED"}] }', :status => 200, :headers => {'Content-Type' => 'application/json' }})
+  end
 end
 
 describe Netscaler::Server do
-  before(:all) do
+  let(:connection) {Netscaler::Connection.new({"username" => "user", "password" => "pass", "hostname" => "10.0.0.1"})}
+  before do
     WebHTTPMock.login
-    @connection = Netscaler::Connection.new({"username" => "user", "password" => "pass", "hostname" => "10.0.0.1"})
-    @connection.login
+    connection.login
   end
   
   describe "#update" do
@@ -28,15 +34,14 @@ describe Netscaler::Server do
   describe "#self.get_all" do
     it "should return an array" do
       WebHTTPMock.get_all
-      Netscaler::Server.get_all(@connection).should be_an_instance_of Array
+      Netscaler::Server.get_all(connection).should be_an_instance_of Array
     end
   end
 
   describe "#self.get" do
-    context "when server exists" do
-    end
-    
-    context "when server does not exist" do
+    it "should return an array" do
+      WebHTTPMock.get
+      Netscaler::Server.get(connection).should be_an_instance_of Array
     end
   end
   
