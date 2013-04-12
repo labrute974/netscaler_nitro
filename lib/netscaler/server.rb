@@ -1,18 +1,16 @@
 module Netscaler
   class Server
-    attr_reader :name, :ipaddress, :state
+    attr_reader :name, :state, :ipaddress
     
     @@type = "server"
-    @@options = {
-      "name" => "",
-      "ipaddress" => "",
-      "state" => ""
-    }
+    @name = ""
+    @@options = ["ipaddress", "state"]
     
-    def initialize(name, ipaddress, state)
+    def initialize(nitro, name, options = {})
+      @nitro = nitro
       @name = name
-      @ipaddress = ipaddress
-      @state = state
+      @ipaddress = options["ipaddress"] if options.include? "ipaddress"
+      @state = options["state"] if options.include? "state"
     end
     
     def ipaddress=
@@ -24,7 +22,7 @@ module Netscaler
     end
     
     def enable!
-      Server.disable
+      Server.disable()
     end
     
     def self.get(nitro, name = "")
@@ -37,11 +35,17 @@ module Netscaler
       response = response[@@type] if response
       
       if response
-        response.map {|srv| }
-        #code
+        objects = response.map do |srv|
+          options = {}
+          @@options.each{|opt| options[opt] = srv[opt] if srv.has_key? opt}
+          
+          Server.new(nitro, srv["name"], options)
+        end
+      else
+        objects = false
       end
       
-      return response
+      return objects
     end
     
     def self.find_by_ip(nitro, ip = "")
