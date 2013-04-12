@@ -25,8 +25,18 @@ module Netscaler
       Server.disable()
     end
     
-    def self.get(nitro, name = "")
-      #code
+    def self.get(nitro, name)
+      response = nitro.get(@@type + '/' + name)
+
+      response = response[@@type] if response
+      
+      if response
+        options = {}
+        srv = response[0]
+        @@options.each{|opt| options[opt] = srv[opt] if srv.has_key? opt}
+        Server.new(nitro, name, options)
+      end
+      
     end
     
     def self.get_all(nitro)
