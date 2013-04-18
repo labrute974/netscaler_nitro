@@ -14,15 +14,51 @@ module Netscaler
     end
     
     def ipaddress=
-      #code
+      
     end
     
     def disable!
-      #code
+      if self.enabled?
+        payload = {"params" => "disable", @@type => {"name" => @name}}
+  
+        if @nitro.post payload
+          @state = "DISABLED"
+          value = true
+        else
+          value = false
+        end
+      else
+        value = true
+      end
+      
+      return value
     end
     
     def enable!
-      Server.disable()
+      unless self.enabled?
+        payload = {"params" => "enable", @@type => {"name" => @name}}
+    
+        if @nitro.post payload
+          @state = "ENABLED"
+          value = true
+        else
+          value = false
+        end
+      else
+        value = true
+      end
+      
+      return value
+    end
+    
+    def enabled?
+      if @state == "ENABLED"
+        value = true
+      else
+        value = false
+      end
+      
+      return value
     end
     
     def self.find_by_name(nitro, name)
@@ -34,9 +70,12 @@ module Netscaler
         options = {}
         srv = response[0]
         @@options.each{|opt| options[opt] = srv[opt] if srv.has_key? opt}
-        Server.new(nitro, name, options)
+        value = Server.new(nitro, name, options)
+      else
+        value = nil
       end
       
+      return value
     end
     
     def self.get_all(nitro)
@@ -74,8 +113,19 @@ module Netscaler
       return object
     end
     
-    def self.disable(nitro, name)
-      #code
+    def self.add(nitro, name, options)
+      payload = { @@type => { "name" => name } }
+      server = Netscaler::Server.new(nitro, name, options)
+      
+      payload[@@type].merge! options
+      
+      nitro.post payload
+      
+      return find_by_name nitro, name
+    end
+    
+    def self.delete(nitro, name)
+      nitro.delete @@type + '/' + name
     end
   end
 end
