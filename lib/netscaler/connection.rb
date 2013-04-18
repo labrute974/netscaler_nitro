@@ -35,9 +35,9 @@ module Netscaler
       return @sessionid
     end
 
-    def get(type)
+    def get(uri)
       begin
-        response = RestClient.get @base_url + '/' + type, @postheaders
+        response = RestClient.get @base_url + '/' + uri, @postheaders
       rescue => e
         puts e.message
         puts e.backtrace.inspect
@@ -73,6 +73,26 @@ module Netscaler
         retvalue = resphash
       end
 
+      return retvalue
+    end
+    
+    def delete(uri)
+      begin
+        response = RestClient.delete @base_url + '/' + uri, @postheaders
+      rescue
+        puts e.message
+        puts e.backtrace.inspect
+        return false
+      end
+      
+      resphash = JSON.parse response
+      if resphash["errorcode"] != 0
+        @error_message = resphash['message']
+        retvalue = false
+      else
+        @error_message = nil
+        retvalue = resphash
+      end
       return retvalue
     end
 
