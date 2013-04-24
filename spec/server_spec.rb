@@ -17,7 +17,7 @@ class WebHTTPMock
   def self.find_by_name(name)
     stub_request( :get, "http://10.0.0.1/nitro/v1/config/server/#{name}").
         with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/x-www-form-urlencoded', 'Cookie' => "sessionid=##CCD41760A2B71E88E029BC33F00E9C24704E71821EB86BD9A3AD2E5005C5"}).
-        to_return({ :body => '{"errorcode": 0, "message": "Done", "server": [{"name": "#{name", "ipaddress": "1.1.1.1", "state": "ENABLED"}] }', :status => 200, :headers => {'Content-Type' => 'application/json' }})
+        to_return({ :body => '{"errorcode": 0, "message": "Done", "server": [{"name": "' + name + '", "ipaddress": "1.1.1.1", "state": "ENABLED"}] }', :status => 200, :headers => {'Content-Type' => 'application/json' }})
   end
   
   def self.enable
@@ -34,9 +34,9 @@ class WebHTTPMock
        to_return({ :status => 200, :body => '{"errorcode": 0, "message": "Done"}', :headers => {'Content-Type' => 'application/json'}})
   end
   
-  def self.add
+  def self.add(name)
     stub_request( :post, "http://10.0.0.1/nitro/v1/config").
-      with(:body => {"object"=>"{\"server\":{\"name\":\"srvtest\",\"ipaddress\":\"1.1.1.1\",\"state\":\"ENABLED\"}}"},
+      with(:body => {"object"=>"{\"server\":{\"name\":\"#{name}\",\"ipaddress\":\"1.1.1.1\",\"state\":\"ENABLED\"}}"},
            :headers => {'Accept'=>'application/json', 'Content-Type'=>'application/x-www-form-urlencoded'}).
       to_return({ :body => '{"errorcode": 0, "message": "Done"}', :status => 200, :headers => {'Content-Type' => 'application/json' }})
   end
@@ -45,6 +45,13 @@ class WebHTTPMock
     stub_request( :delete, "http://10.0.0.1/nitro/v1/config/server/#{name}").
       with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/x-www-form-urlencoded', 'Cookie' => "sessionid=##CCD41760A2B71E88E029BC33F00E9C24704E71821EB86BD9A3AD2E5005C5"}).
       to_return({ :body => '{"errorcode": 0, "message": "Done"}', :status => 200, :headers => {'Content-Type' => 'application/json' }})
+  end
+  
+  def self.update
+    stub_request(:put, "http://10.0.0.1/nitro/v1/config").
+      with(:body => {"object"=>"{\"server\":{\"name\":\"srv3\",\"ipaddress\":\"10.0.0.3\"}}"},
+        :headers => {'Accept'=>'application/json', 'Content-Type'=>'application/x-www-form-urlencoded', 'Cookie'=>'sessionid=##CCD41760A2B71E88E029BC33F00E9C24704E71821EB86BD9A3AD2E5005C5'}).
+      to_return(:status => 200, :body => '{"errorcode": 0, "message": "Done"}', :headers => {'Content-Type' => 'application/json'})
   end
 end
 
@@ -79,15 +86,14 @@ describe Netscaler::Server do
   describe "#self.add" do
     specify do
       name = "srvtest"
-      WebHTTPMock.add
+      WebHTTPMock.add name
       WebHTTPMock.find_by_name name
+      
       options = {"ipaddress" => "1.1.1.1", "state" => "ENABLED"}
       Netscaler::Server.add(connection, name, options).should be_an_instance_of Netscaler::Server
     end
   end
   
-  describe "#update" do
-  end
   
   describe "#self.delete" do
     specify do
@@ -101,6 +107,7 @@ describe Netscaler::Server do
   context "when Netscaler::Server instanciated" do
     context "when enabled" do
       let(:server) {Netscaler::Server.new(connection, "srv3", {"ipaddress" => "1.1.1.1", "state" => "ENABLED"})}
+      
       describe "#enable!" do
         it { server.enable!.should be true }
       end
@@ -115,10 +122,18 @@ describe Netscaler::Server do
       describe "#enabled?" do
         it {server.enabled?.should be true}
       end
+      
+      describe "#update" do
+        specify do
+          WebHTTPMock.update
+          server.update!({"ipaddress" => "10.0.0.3"}).should be true
+        end
+      end
     end
-    
+  
     context "when disabled" do
       let(:server) {Netscaler::Server.new(connection, "srv3", {"ipaddress" => "1.1.1.1", "state" => "DISABLED"})}
+       
       describe "#enable!" do
         specify do
           WebHTTPMock.enable
