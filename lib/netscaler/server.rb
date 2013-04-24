@@ -26,7 +26,7 @@ module Netscaler
     
     def disable!
       if self.enabled?
-        payload = {"params" => "disable", @@type => {"name" => @name}}
+        payload = {"params" => { "action" => "disable" }, @@type => {"name" => @name}}
   
         if @nitro.post payload
           @params["state"] = "DISABLED"
@@ -43,7 +43,7 @@ module Netscaler
     
     def enable!
       unless self.enabled?
-        payload = {"params" => "enable", @@type => {"name" => @name}}
+        payload = {"params" => { "action" => "enable" }, @@type => {"name" => @name}}
     
         if @nitro.post payload
           @params["state"] = "ENABLED"
