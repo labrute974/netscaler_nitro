@@ -76,6 +76,27 @@ module Netscaler
       return retvalue
     end
     
+    def put(payload = {})
+      begin
+        response = RestClient.put @base_url, "object=#{payload.to_json}", @postheaders
+      rescue => e
+        puts e.message
+        puts e.backtrace.inspect
+        return false
+      end
+
+      resphash = JSON.parse response
+      if resphash["errorcode"] != 0
+        @error_message = resphash['message']
+        retvalue = false
+      else
+        @error_message = nil
+        retvalue = resphash
+      end
+
+      return retvalue
+    end
+
     def delete(uri)
       begin
         response = RestClient.delete @base_url + '/' + uri, @postheaders
