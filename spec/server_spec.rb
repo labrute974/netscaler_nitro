@@ -1,9 +1,11 @@
 require "rspec_helper"
+require "json"
 
 class WebHTTPMock
   def self.login
+    request = { "login" => { "username" => "user", "password" => "pass" }}
     stub_request( :post, "http://10.0.0.1/nitro/v1/config").
-        with(:body => {"object"=>"{\"login\":{\"username\":\"user\",\"password\":\"pass\"}}"},
+        with(:body => { "object" => request.to_json },
           :headers => {'Accept'=>'application/json', 'Content-Type'=>'application/x-www-form-urlencoded'}).
         to_return({ :body => '{"errorcode": 0, "message": "Done", "sessionid": "##CCD41760A2B71E88E029BC33F00E9C24704E71821EB86BD9A3AD2E5005C5" }', :status => 200, :headers => {'Content-Type' => 'application/json' }})
   end
@@ -21,23 +23,34 @@ class WebHTTPMock
   end
   
   def self.enable
+    request = { "params" => { "action" => "enable" }, "server" => { "name" => "srv3" }}
     stub_request(:post, "http://10.0.0.1/nitro/v1/config").
-      with(:body => {"object"=>"{\"params\":\"enable\",\"server\":{\"name\":\"srv3\"}}"},
+      with(:body => { "object" => request.to_json},
        :headers => {'Accept'=>'application/json', 'Content-Type'=>'application/x-www-form-urlencoded', 'Cookie'=>'sessionid=##CCD41760A2B71E88E029BC33F00E9C24704E71821EB86BD9A3AD2E5005C5'}).
        to_return({ :status => 200, :body => '{"errorcode": 0, "message": "Done"}', :headers => {'Content-Type' => 'application/json'}})
   end
   
   def self.disable
+    request = { "params" => { "action" => "disable" }, "server" => { "name" => "srv3" }}
     stub_request(:post, "http://10.0.0.1/nitro/v1/config").
-      with(:body => {"object"=>"{\"params\":\"disable\",\"server\":{\"name\":\"srv3\"}}"},
+      with(:body => { "object" => request.to_json },
        :headers => {'Accept'=>'application/json', 'Content-Type'=>'application/x-www-form-urlencoded', 'Cookie'=>'sessionid=##CCD41760A2B71E88E029BC33F00E9C24704E71821EB86BD9A3AD2E5005C5'}).
        to_return({ :status => 200, :body => '{"errorcode": 0, "message": "Done"}', :headers => {'Content-Type' => 'application/json'}})
   end
   
+  def self.rename
+    request = { "params" => { "action" => "rename" }, "server" => { "name" => "newsrvname" }}
+    stub_request(:post, "http://10.0.0.1/nitro/v1/config").
+      with(:body => { "object" => request.to_json },
+       :headers => {'Accept'=>'application/json', 'Content-Type'=>'application/x-www-form-urlencoded', 'Cookie'=>'sessionid=##CCD41760A2B71E88E029BC33F00E9C24704E71821EB86BD9A3AD2E5005C5'}).
+       to_return({ :status => 200, :body => '{"errorcode": 0, "message": "Done"}', :headers => {'Content-Type' => 'application/json'}})
+  end
+
   def self.add(name)
+    request = { "server" => { "name" => name, "ipaddress" => "1.1.1.1", "state" => "ENABLED" }}
     stub_request( :post, "http://10.0.0.1/nitro/v1/config").
-      with(:body => {"object"=>"{\"server\":{\"name\":\"#{name}\",\"ipaddress\":\"1.1.1.1\",\"state\":\"ENABLED\"}}"},
-           :headers => {'Accept'=>'application/json', 'Content-Type'=>'application/x-www-form-urlencoded'}).
+      with(:body => { "object" => request.to_json },
+        :headers => {'Accept'=>'application/json', 'Content-Type'=>'application/x-www-form-urlencoded'}).
       to_return({ :body => '{"errorcode": 0, "message": "Done"}', :status => 200, :headers => {'Content-Type' => 'application/json' }})
   end
   
@@ -48,8 +61,9 @@ class WebHTTPMock
   end
   
   def self.update
-    stub_request(:put, "http://10.0.0.1/nitro/v1/config").
-      with(:body => {"object"=>"{\"server\":{\"name\":\"srv3\",\"ipaddress\":\"10.0.0.3\"}}"},
+    request = { "server" => { "name" => "srv3", "ipaddress" => "10.0.0.3" }}
+    stub_request( :put, "http://10.0.0.1/nitro/v1/config").
+      with(:body => { "object" => request.to_json },
         :headers => {'Accept'=>'application/json', 'Content-Type'=>'application/x-www-form-urlencoded', 'Cookie'=>'sessionid=##CCD41760A2B71E88E029BC33F00E9C24704E71821EB86BD9A3AD2E5005C5'}).
       to_return(:status => 200, :body => '{"errorcode": 0, "message": "Done"}', :headers => {'Content-Type' => 'application/json'})
   end
@@ -109,24 +123,31 @@ describe Netscaler::Server do
       let(:server) {Netscaler::Server.new(connection, "srv3", {"ipaddress" => "1.1.1.1", "state" => "ENABLED"})}
       
       describe "#enable!" do
-        it { server.enable!.should be true }
+        it { server.enable!.should be_true }
       end
   
       describe "#disable!" do
         specify do
           WebHTTPMock.disable
-          server.disable!.should be true
+          server.disable!.should be_true
         end
       end
 
       describe "#enabled?" do
-        it {server.enabled?.should be true}
+        it {server.enabled?.should be_true}
       end
       
       describe "#update" do
         specify do
           WebHTTPMock.update
-          server.update!({"ipaddress" => "10.0.0.3"}).should be true
+          server.update!({"ipaddress" => "10.0.0.3"}).should be_true
+        end
+      end
+      
+      describe "#rename" do
+        specify do
+          WebHTTPMock.rename
+          server.rename!("newsvrname").should be_true
         end
       end
     end
@@ -137,16 +158,16 @@ describe Netscaler::Server do
       describe "#enable!" do
         specify do
           WebHTTPMock.enable
-          server.enable!.should be true
+          server.enable!.should be_true
         end
       end
   
       describe "#disable!" do
-        it { server.disable!.should be true }
+        it { server.disable!.should be_true }
       end
       
       describe "#enabled?" do
-        it {server.enabled?.should_not be true}
+        it {server.enabled?.should_not be_true}
       end
     end
   end
