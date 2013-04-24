@@ -1,16 +1,23 @@
 module Netscaler
   class Server < NSBaseObject
-    attr_reader :name, :state, :ipaddress
+    attr_reader :name, :params
     
+    @@options = ["ipaddress", "state"]
     @@type = "server"
     @name = ""
-    @@options = ["ipaddress", "state"]
+    @params = {}
     
     def initialize(nitro, name, options = {})
+      raise ArgumentError, "name should a String" unless name.is_a? String
+      raise ArgumentError, "options must be a Hash" unless options.is_a? Hash
+      raise ArgumentError, "the Hash doesn't have the right keys: should have #{@@options.to_s}, had => #{options.keys.to_s}" if @@options != options.keys
+      
       @nitro = nitro
       @name = name
-      @ipaddress = options["ipaddress"] if options.include? "ipaddress"
-      @state = options["state"] if options.include? "state"
+      @params = {}
+      @@options.each do |k|
+        @params[k] = options[k]
+      end
     end
     
     def ipaddress=
@@ -22,7 +29,7 @@ module Netscaler
         payload = {"params" => "disable", @@type => {"name" => @name}}
   
         if @nitro.post payload
-          @state = "DISABLED"
+          @params["state"] = "DISABLED"
           value = true
         else
           value = false
@@ -39,7 +46,7 @@ module Netscaler
         payload = {"params" => "enable", @@type => {"name" => @name}}
     
         if @nitro.post payload
-          @state = "ENABLED"
+          @params["state"] = "ENABLED"
           value = true
         else
           value = false
@@ -52,7 +59,7 @@ module Netscaler
     end
     
     def enabled?
-      if @state == "ENABLED"
+      if @params["state"] == "ENABLED"
         value = true
       else
         value = false
@@ -61,14 +68,13 @@ module Netscaler
       return value
     end
     
-    
     def self.find_by_ip(nitro, ip)
       objects = get_all(nitro)
       object = nil
       
       if objects
         objects.each do |obj|
-          if obj.ipaddress == ip
+          if obj.params["ipaddress"] == ip
             object = obj
             break
           end
