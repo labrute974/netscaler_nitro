@@ -1,8 +1,8 @@
 module Netscaler
-  class Server < NSBaseObject
+  class Server < NSStateBaseObject
     attr_reader :name, :params
     
-    def initialize(nitro, name, options = {})
+    def initialize(nitro, name, options)
       required = ["ipaddress"]
       @options = ["ipaddress", "state", "comment"] 
       @type = "server"
@@ -19,50 +19,6 @@ module Netscaler
       options.each do |k,v|
         @params[k] = v
       end
-    end
-    
-    def disable!
-      if self.enabled?
-        payload = {"params" => { "action" => "disable" }, @type => {"name" => @name}}
-  
-        if @nitro.post payload
-          @params["state"] = "DISABLED"
-          value = true
-        else
-          value = false
-        end
-      else
-        value = true
-      end
-      
-      return value
-    end
-    
-    def enable!
-      unless self.enabled?
-        payload = {"params" => { "action" => "enable" }, @type => {"name" => @name}}
-    
-        if @nitro.post payload
-          @params["state"] = "ENABLED"
-          value = true
-        else
-          value = false
-        end
-      else
-        value = true
-      end
-      
-      return value
-    end
-    
-    def enabled?
-      if @params["state"] == "ENABLED"
-        value = true
-      else
-        value = false
-      end
-      
-      return value
     end
     
     def self.find_by_ip(nitro, ip)
