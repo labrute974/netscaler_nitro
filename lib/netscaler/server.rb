@@ -2,26 +2,25 @@ module Netscaler
   class Server < NSBaseObject
     attr_reader :name, :params
     
-    @@options = ["ipaddress", "state"]
+    @@options = ["ipaddress", "state", "comment"]
     @@type = "server"
     @name = ""
     @params = {}
     
     def initialize(nitro, name, options = {})
+      required = ["ipaddress"]
       raise ArgumentError, "name should a String" unless name.is_a? String
       raise ArgumentError, "options must be a Hash" unless options.is_a? Hash
-      raise ArgumentError, "the Hash doesn't have the right keys: should have #{@@options.to_s}, had => #{options.keys.to_s}" if @@options != options.keys
+      
+      options.keys.each { |k| raise ArgumentError, "unknown key (arg:3) : #{k}" unless @@options.include? k }
+      required.each { |k| raise ArgumentError, "the Hash doesn't have the required keys (arg:3) : should have #{required.to_s}, had => #{options.keys.to_s}" unless options.include? k }
       
       @nitro = nitro
       @name = name
       @params = {}
-      @@options.each do |k|
-        @params[k] = options[k]
+      options.each do |k,v|
+        @params[k] = v
       end
-    end
-    
-    def ipaddress=
-      
     end
     
     def disable!
