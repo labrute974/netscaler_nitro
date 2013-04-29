@@ -4,6 +4,19 @@ module Netscaler
     @@type = ""
     @params = {}
     
+    def rename!(newname)
+      raise ArgumentError, "argument should be a String" unless newname.is_a? String
+      
+      payload = { "params" => { "action" => "rename" }, @@type => { "name" => @name, "newname" => newname }}
+      
+      if @nitro.post payload
+        @name = newname
+        true
+      else
+        false
+      end
+    end
+
     def update!(params)
       raise ArgumentError, "argument must be a Hash" unless params.is_a? Hash
       
@@ -26,9 +39,13 @@ module Netscaler
       payload = { @@type => { "name" => name } }
       payload[@@type].merge! options
       
-      nitro.post payload
+      response = nitro.post payload
       
-      return find_by_name nitro, name
+      if response
+        find_by_name nitro, name
+      else
+        false
+      end
     end
     
     def self.find_by_name(nitro, name)
