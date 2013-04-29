@@ -1,4 +1,4 @@
-require "rspec_helper"
+require "rspec_helper_mock"
 require "json"
 
 class WebHTTPMock
@@ -39,7 +39,7 @@ class WebHTTPMock
   end
   
   def self.rename
-    request = { "params" => { "action" => "rename" }, "server" => { "name" => "newsrvname" }}
+    request = { "params" => { "action" => "rename" }, "server" => { "name" => "srv3", "newname" => "newsrvname" }}
     stub_request(:post, "http://10.0.0.1/nitro/v1/config").
       with(:body => { "object" => request.to_json },
        :headers => {'Accept'=>'application/json', 'Content-Type'=>'application/x-www-form-urlencoded', 'Cookie'=>'sessionid=##CCD41760A2B71E88E029BC33F00E9C24704E71821EB86BD9A3AD2E5005C5'}).
@@ -107,7 +107,6 @@ describe Netscaler::Server do
       Netscaler::Server.add(connection, name, options).should be_an_instance_of Netscaler::Server
     end
   end
-  
   
   describe "#self.delete" do
     specify do

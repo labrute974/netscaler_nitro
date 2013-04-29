@@ -1,4 +1,4 @@
-require "rspec_helper"
+require "rspec_helper_mock"
 
 class WebHTTPMock
   def self.login
