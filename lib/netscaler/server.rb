@@ -2,17 +2,15 @@ module Netscaler
   class Server < NSBaseObject
     attr_reader :name, :params
     
-    @@options = ["ipaddress", "state", "comment"]
-    @@type = "server"
-    @name = ""
-    @params = {}
-    
     def initialize(nitro, name, options = {})
       required = ["ipaddress"]
+      @options = ["ipaddress", "state", "comment"] 
+      @type = "server"
+
       raise ArgumentError, "name should a String" unless name.is_a? String
       raise ArgumentError, "options must be a Hash" unless options.is_a? Hash
       
-      options.keys.each { |k| raise ArgumentError, "unknown key (arg:3) : #{k}" unless @@options.include? k }
+      options.keys.each { |k| raise ArgumentError, "unknown key (arg:3) : #{k}" unless @options.include? k }
       required.each { |k| raise ArgumentError, "the Hash doesn't have the required keys (arg:3) : should have #{required.to_s}, had => #{options.keys.to_s}" unless options.include? k }
       
       @nitro = nitro
@@ -25,7 +23,7 @@ module Netscaler
     
     def disable!
       if self.enabled?
-        payload = {"params" => { "action" => "disable" }, @@type => {"name" => @name}}
+        payload = {"params" => { "action" => "disable" }, @type => {"name" => @name}}
   
         if @nitro.post payload
           @params["state"] = "DISABLED"
@@ -42,7 +40,7 @@ module Netscaler
     
     def enable!
       unless self.enabled?
-        payload = {"params" => { "action" => "enable" }, @@type => {"name" => @name}}
+        payload = {"params" => { "action" => "enable" }, @type => {"name" => @name}}
     
         if @nitro.post payload
           @params["state"] = "ENABLED"
@@ -81,6 +79,14 @@ module Netscaler
       end
       
       return object
+    end
+    
+    def self.get_options
+      ["ipaddress", "state", "comment"]
+    end
+    
+    def self.get_type
+      "server"
     end
   end
 end

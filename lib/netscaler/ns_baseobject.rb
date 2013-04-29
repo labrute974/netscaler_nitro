@@ -1,13 +1,11 @@
 module Netscaler
   class NSBaseObject
-    @@options = []
-    @@type = ""
     @params = {}
     
     def rename!(newname)
       raise ArgumentError, "argument should be a String" unless newname.is_a? String
       
-      payload = { "params" => { "action" => "rename" }, @@type => { "name" => @name, "newname" => newname }}
+      payload = { "params" => { "action" => "rename" }, @type => { "name" => @name, "newname" => newname }}
       
       if @nitro.post payload
         @name = newname
@@ -21,12 +19,12 @@ module Netscaler
       raise ArgumentError, "argument must be a Hash" unless params.is_a? Hash
       
       params.each do |k,v|
-        raise ArgumentError, "unknown key: #{k}" unless @@options.include? k
+        raise ArgumentError, "unknown key: #{k}" unless @options.include? k
         @params[k] = v
       end
       
-      payload = { @@type => {"name" => @name} }
-      payload[@@type].merge!(params)
+      payload = { @type => {"name" => @name} }
+      payload[@type].merge!(params)
       
       if @nitro.put payload
         true
@@ -36,8 +34,8 @@ module Netscaler
     end
 
     def self.add(nitro, name, options)
-      payload = { @@type => { "name" => name } }
-      payload[@@type].merge! options
+      payload = { get_type => { "name" => name } }
+      payload[get_type].merge! options
       
       response = nitro.post payload
       
@@ -49,14 +47,14 @@ module Netscaler
     end
     
     def self.find_by_name(nitro, name)
-      response = nitro.get(@@type + '/' + name)
+      response = nitro.get(get_type + '/' + name)
 
-      response = response[@@type] if response
+      response = response[get_type] if response
       
       if response
         options = {}
         resource = response[0]
-        @@options.each {|opt| options[opt] = resource[opt] if resource.has_key? opt}
+        self.get_options.each {|opt| options[opt] = resource[opt] if resource.has_key? opt}
         
         value = eval(self.name).new(nitro, name, options)
       else
@@ -67,14 +65,16 @@ module Netscaler
     end
     
     def self.get_all(nitro)
-      response = nitro.get(@@type)
+      response = nitro.get(get_type)
       
-      response = response[@@type] if response
+      response = response[get_type] if response
       
       if response
         objects = response.map do |obj|
           options = {}
-          @@options.each{|opt| options[opt] = obj[opt] if obj.has_key? opt}
+          self.get_options.each do |opt|
+            options[opt] = obj[opt] if obj.has_key? opt
+          end
           
           eval(self.name).new(nitro, obj["name"], options)
         end
@@ -86,7 +86,7 @@ module Netscaler
     end
 
     def self.delete(nitro, name)
-      nitro.delete @@type + '/' + name
+      nitro.delete get_type + '/' + name
     end
   end
 end
