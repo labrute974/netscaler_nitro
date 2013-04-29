@@ -76,9 +76,9 @@ module Netscaler
       return retvalue
     end
     
-    def put(payload = {})
+    def put(payload)
       begin
-        response = RestClient.put @base_url, "object=#{payload.to_json}", @postheaders
+        response = RestClient.put @base_url, {"sessionid" => @sessionid}.merge(payload).to_json, @postheaders
       rescue => e
         puts e.message
         puts e.backtrace.inspect
