@@ -6,6 +6,8 @@ module Netscaler
       required = ["ipaddress"]
       @options = ["ipaddress", "state", "comment"] 
       @type = "server"
+      @nsname_key = "name"
+
 
       raise ArgumentError, "name should a String" unless name.is_a? String
       raise ArgumentError, "options must be a Hash" unless options.is_a? Hash

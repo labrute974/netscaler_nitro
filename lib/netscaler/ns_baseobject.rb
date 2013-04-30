@@ -1,11 +1,12 @@
 module Netscaler
   class NSBaseObject
     @params = {}
+    @nsname_key = "name"
     
     def rename!(newname)
       raise ArgumentError, "argument should be a String" unless newname.is_a? String
       
-      payload = { "params" => { "action" => "rename" }, @type => { "name" => @name, "newname" => newname }}
+      payload = { "params" => { "action" => "rename" }, @type => { @nsname_key => @name, "newname" => newname }}
       
       if @nitro.post payload
         @name = newname
@@ -23,7 +24,7 @@ module Netscaler
         @params[k] = v
       end
       
-      payload = { @type => {"name" => @name} }
+      payload = { @type => {@nsname_key => @name} }
       payload[@type].merge!(params)
       
       if @nitro.put payload
@@ -34,7 +35,7 @@ module Netscaler
     end
 
     def self.add(nitro, name, options)
-      payload = { get_type => { "name" => name } }
+      payload = { get_type => { get_nsname_key => name } }
       payload[get_type].merge! options
       
       response = nitro.post payload
@@ -76,7 +77,7 @@ module Netscaler
             options[opt] = obj[opt] if obj.has_key? opt
           end
           
-          eval(self.name).new(nitro, obj["name"], options)
+          eval(self.name).new(nitro, obj[get_nsname_key], options)
         end
       else
         objects = false
@@ -87,6 +88,10 @@ module Netscaler
 
     def self.delete(nitro, name)
       nitro.delete get_type + '/' + name
+    end
+    
+    def self.get_nsname_key
+      "name"
     end
   end
 end
