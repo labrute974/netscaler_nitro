@@ -2,6 +2,10 @@ require "rspec_helper_mock"
 require "json"
 
 class WebHTTPMockServer < WebHTTPMock
+  def self.get_nsname_key
+    "name"
+  end
+  
   def self.get_type
     "server"
   end
@@ -12,6 +16,14 @@ class WebHTTPMockServer < WebHTTPMock
         to_return({ :body => '{"errorcode": 0, "message": "Done", "server": [{"name": "srv1", "ipaddress": "1.1.1.1", "state": "ENABLED"}, {"name": "srv2", "ipaddress": "2.2.2.2", "state": "DISABLED"}] }', :status => 200, :headers => {'Content-Type' => 'application/json' }})
   end
   
+  def self.update(name)
+    request = { "sessionid" => "##CCD41760A2B71E88E029BC33F00E9C24704E71821EB86BD9A3AD2E5005C5", get_type => { get_nsname_key => name, "ipaddress" => "10.0.0.3" }}
+    stub_request( :put, "http://10.0.0.1/nitro/v1/config").
+      with(:body => request.to_json,
+        :headers => {'Accept'=>'application/json', 'Content-Type'=>'application/x-www-form-urlencoded', 'Cookie'=>'sessionid=##CCD41760A2B71E88E029BC33F00E9C24704E71821EB86BD9A3AD2E5005C5'}).
+      to_return(:status => 200, :body => '{"errorcode": 0, "message": "Done"}', :headers => {'Content-Type' => 'application/json'})
+  end
+
   def self.find_by_name(name)
     stub_request( :get, "http://10.0.0.1/nitro/v1/config/#{get_type}/#{name}").
         with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/x-www-form-urlencoded', 'Cookie' => "sessionid=##CCD41760A2B71E88E029BC33F00E9C24704E71821EB86BD9A3AD2E5005C5"}).
@@ -29,6 +41,8 @@ end
 
 describe Netscaler::Server do
   let(:connection) {Netscaler::Connection.new({"username" => "user", "password" => "pass", "hostname" => "10.0.0.1"})}
+  let(:servername) {"srvtest"}
+  
   before do
     WebHTTPMockServer.login
     connection.login
@@ -43,8 +57,8 @@ describe Netscaler::Server do
 
   describe "#self.find_by_name" do
    specify do
-     WebHTTPMockServer.find_by_name "srv1"
-     Netscaler::Server.find_by_name(connection, "srv1").should be_an_instance_of Netscaler::Server
+     WebHTTPMockServer.find_by_name servername
+     Netscaler::Server.find_by_name(connection, servername).should be_an_instance_of Netscaler::Server
    end
   end
 
@@ -57,27 +71,24 @@ describe Netscaler::Server do
   
   describe "#self.add" do
     specify do
-      name = "srvtest"
-      WebHTTPMockServer.add name
-      WebHTTPMockServer.find_by_name name
+      WebHTTPMockServer.add servername
+      WebHTTPMockServer.find_by_name servername
       
       options = {"ipaddress" => "1.1.1.1", "state" => "ENABLED"}
-      Netscaler::Server.add(connection, name, options).should be_an_instance_of Netscaler::Server
+      Netscaler::Server.add(connection, servername, options).should be_an_instance_of Netscaler::Server
     end
   end
   
   describe "#self.delete" do
     specify do
-      name = "srvtest"
-      
-      WebHTTPMockServer.delete name
-      Netscaler::Server.delete(connection, name).should be_true
+      WebHTTPMockServer.delete servername
+      Netscaler::Server.delete(connection, servername).should be_true
     end
   end
   
   context "when Netscaler::Server instanciated" do
     context "when enabled" do
-      let(:server) {Netscaler::Server.new(connection, "srv3", {"ipaddress" => "1.1.1.1", "state" => "ENABLED"})}
+      let(:server) {Netscaler::Server.new(connection, servername, {"ipaddress" => "1.1.1.1", "state" => "ENABLED"})}
       
       describe "#enable!" do
         it { server.enable!.should be_true }
@@ -85,7 +96,7 @@ describe Netscaler::Server do
   
       describe "#disable!" do
         specify do
-          WebHTTPMockServer.disable
+          WebHTTPMockServer.disable servername
           server.disable!.should be_true
         end
       end
@@ -96,25 +107,26 @@ describe Netscaler::Server do
       
       describe "#update" do
         specify do
-          WebHTTPMockServer.update
+          WebHTTPMockServer.update(servername)
           server.update!({"ipaddress" => "10.0.0.3"}).should be_true
         end
       end
       
       describe "#rename" do
         specify do
-          WebHTTPMockServer.rename
-          server.rename!("newsvrname").should be_true
+          newname = "newsvrname"
+          WebHTTPMockServer.rename servername, newname
+          server.rename!(newname).should be_true
         end
       end
     end
   
     context "when disabled" do
-      let(:server) {Netscaler::Server.new(connection, "srv3", {"ipaddress" => "1.1.1.1", "state" => "DISABLED"})}
+      let(:server) {Netscaler::Server.new(connection, servername, {"ipaddress" => "1.1.1.1", "state" => "DISABLED"})}
        
       describe "#enable!" do
         specify do
-          WebHTTPMockServer.enable
+          WebHTTPMockServer.enable servername
           server.enable!.should be_true
         end
       end
