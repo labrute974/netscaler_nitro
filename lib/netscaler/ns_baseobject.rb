@@ -6,7 +6,7 @@ module Netscaler
     def rename!(newname)
       raise ArgumentError, "argument should be a String" unless newname.is_a? String
       
-      payload = { "params" => { "action" => "rename" }, @type => { @nsname_key => @name, "newname" => newname }}
+      payload = { "params" => { "action" => "rename" }, @type => { @nsname_key => @name, "new#{@nsname_key}" => newname }}
       
       if @nitro.post payload
         @name = newname
