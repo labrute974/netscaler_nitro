@@ -21,6 +21,8 @@ module Netscaler
       options.each do |k,v|
         @params[k] = v
       end
+      
+      @params["state"] = "ENABLED" unless @params.has_key? "state"
     end
     
     def self.find_by_ip(nitro, ip)
