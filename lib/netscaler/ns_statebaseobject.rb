@@ -2,14 +2,8 @@ module Netscaler
   class NSStateBaseObject < NSBaseObject
     def disable!
       if self.enabled?
-        payload = {"params" => { "action" => "disable" }, @type => {@nsname_key => @name}}
-  
-        if @nitro.post payload
-          @params["state"] = "DISABLED"
-          value = true
-        else
-          value = false
-        end
+        value = send_action "disable"
+        @params["state"] = "DISABLED" if value
       else
         value = true
       end
@@ -19,14 +13,8 @@ module Netscaler
     
     def enable!
       unless self.enabled?
-        payload = {"params" => { "action" => "enable" }, @type => {@nsname_key => @name}}
-    
-        if @nitro.post payload
-          @params["state"] = "ENABLED"
-          value = true
-        else
-          value = false
-        end
+        value = send_action "enable"
+        @params["state"] = "ENABLED" if value
       else
         value = true
       end
@@ -35,11 +23,7 @@ module Netscaler
     end
     
     def enabled?
-      if @params["state"] == "ENABLED"
-        value = true
-      else
-        value = false
-      end
+      value = @params["state"] == "ENABLED" ? true : false
       
       return value
     end
