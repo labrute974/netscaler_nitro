@@ -3,17 +3,16 @@ module Netscaler
     @params = {}
     @nsname_key = "name"
     
+    def send_action(action, options = {})
+      payload = { "params" => { "action" => action}, @type => { @nsname_key => @name }.merge!(options) }
+      
+      @nitro.post payload
+    end
+    
     def rename!(newname)
       raise ArgumentError, "argument should be a String" unless newname.is_a? String
       
-      payload = { "params" => { "action" => "rename" }, @type => { @nsname_key => @name, "new#{@nsname_key}" => newname }}
-      
-      if @nitro.post payload
-        @name = newname
-        true
-      else
-        false
-      end
+      send_action("rename", { "new#{@nsname_key}" => newname })
     end
 
     def update!(params)
