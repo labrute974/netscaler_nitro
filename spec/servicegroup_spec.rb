@@ -81,9 +81,8 @@ describe Netscaler::ServiceGroup do
   end
   
   context "when Netscaler::ServiceGroup instanciated" do
+    let(:servicegroup) {Netscaler::ServiceGroup.new(connection, sgname, {"appflowlog" => "ENABLED", "servicetype" => "HTTP"})}
     context "when enabled" do
-      let(:servicegroup) {Netscaler::ServiceGroup.new(connection, sgname, {"appflowlog" => "ENABLED", "servicetype" => "HTTP"})}
-      
       describe "#enable!" do
         it { servicegroup.enable!.should be_true }
       end
@@ -99,23 +98,13 @@ describe Netscaler::ServiceGroup do
         it {servicegroup.enabled?.should be_true}
       end
       
-      describe "#update" do
-        specify do
-          WebHTTPMockServiceGroup.update servicegroup.name
-          servicegroup.update!({"appflowlog" => "DISABLED"}).should be_true
-        end
-      end
-      
-      describe "#rename" do
-        specify do
-          WebHTTPMockServiceGroup.rename servicegroup.name, "newsgname"
-          servicegroup.rename!("newsgname").should be_true
-        end
-      end
     end
   
     context "when disabled" do
-      let(:servicegroup) {Netscaler::ServiceGroup.new(connection, sgname, {"appflowlog" => "ENABLED", "servicetype" => "HTTP", "state" => "DISABLED"})}
+      before do
+        WebHTTPMockServiceGroup.disable servicegroup.name
+        servicegroup.disable!
+      end
        
       describe "#enable!" do
         specify do
@@ -131,6 +120,35 @@ describe Netscaler::ServiceGroup do
       describe "#enabled?" do
         it {servicegroup.enabled?.should_not be_true}
       end
+    end
+    
+    describe "#update" do
+      specify do
+        WebHTTPMockServiceGroup.update servicegroup.name
+        servicegroup.update!({"appflowlog" => "DISABLED"}).should be_true
+      end
+    end
+      
+    describe "#rename" do
+      specify do
+        WebHTTPMockServiceGroup.rename servicegroup.name, "newsgname"
+        servicegroup.rename!("newsgname").should be_true
+      end
+    end
+    
+    describe "#enable_server" do
+    end
+    
+    describe "#disable_server" do
+    end
+    
+    describe "#list_servers" do
+    end
+    
+    describe "#bind" do
+    end
+    
+    describe "#unbind" do
     end
   end
 end
