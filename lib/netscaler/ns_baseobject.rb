@@ -4,7 +4,17 @@ module Netscaler
     @nsname_key = "name"
     
     def send_action(action, options = {})
-      payload = { "params" => { "action" => action}, @type => { @nsname_key => @name }.merge!(options) }
+      if options.is_a? Array
+        options.each do |opt|
+          opt.merge!({ @nsname_key => @name })
+          raise ArgumentError, "your array (arg:2) must contain hashes" unless opt.is_a? Hash
+        end
+      else
+        raise ArgumentError, "argument must be an Hash or an Array (arg: 2)" unless options.is_a? Hash
+        options.merge!({ @nsname_key => @name })
+      end
+      
+      payload = { "params" => { "action" => action}, @type => options }
       
       @nitro.post payload
     end
