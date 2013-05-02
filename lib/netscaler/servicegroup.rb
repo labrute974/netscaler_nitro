@@ -59,6 +59,24 @@ module Netscaler
       result
     end
     
+    def enable_server(options)
+      raise ArgumentError, "argument must be an Hash" unless options.is_a? Hash
+      
+      attrs = ["servername", "port"]
+      attrs.each {|attr| raise ArgumentError, "the Hash doesn't have the required keys (arg:1) : should have #{attrs.to_s}" unless options.include? attr }
+      
+      send_action("enable", options)
+    end
+    
+    def disable_server(options)
+      raise ArgumentError, "argument must be an Hash" unless options.is_a? Hash
+      
+      attrs = ["servername", "port"]
+      attrs.each {|attr| raise ArgumentError, "the Hash doesn't have the required keys (arg:1) : should have #{attrs.to_s}" unless options.include? attr }
+      
+      send_action("disable", options)
+    end
+   
     def self.get_options
       ["servicetype", "maxclient", "cip", "cipHeader", "usip", "downstateflush", "sc", "sp", "srvtimeout", "clttimeout", "useproxyport", "tcpb", "comment", "state", "cmp", "maxreq", "appflowlog" ]
     end
