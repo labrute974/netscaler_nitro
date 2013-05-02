@@ -52,12 +52,12 @@ class WebHTTPMockServiceGroup < WebHTTPMock
   end
   
   def self.enable_server(name)
-    request = { "params" => { "action" => "enable" }, get_type => { get_nsname_key => name, "servername" => "srvtest", "port" => "80" }}
+    request = { "params" => { "action" => "enable" }, get_type => { "servername" => "srvtest", "port" => "80", get_nsname_key => name }}
     stub_it :post, request
   end
   
   def self.disable_server(name)
-    request = { "params" => { "action" => "disable" }, get_type => { get_nsname_key => name, "servername" => "srvtest", "port" => "80" }}
+    request = { "params" => { "action" => "disable" }, get_type => { "servername" => "srvtest", "port" => "80", get_nsname_key => name }}
     stub_it :post, request
   end
 end
