@@ -9,8 +9,8 @@ include WebMock::API
 class WebHTTPMock
   @@headers = {'Accept'=>'application/json', 'Content-Type'=>'application/x-www-form-urlencoded', 'Cookie'=>'sessionid=##CCD41760A2B71E88E029BC33F00E9C24704E71821EB86BD9A3AD2E5005C5'}
   
-  def self.stub_it(request)
-      stub_request(:post, "http://10.0.0.1/nitro/v1/config").
+  def self.stub_it(httpcmd, request)
+      stub_request(httpcmd, "http://10.0.0.1/nitro/v1/config").
       with(:body => { "object" => request.to_json},
        :headers => @@headers).
        to_return({ :status => 200, :body => '{"errorcode": 0, "message": "Done"}', :headers => {'Content-Type' => 'application/json'}})
@@ -26,17 +26,17 @@ class WebHTTPMock
 
   def self.enable(name)
     request = { "params" => { "action" => "enable" }, get_type => { get_nsname_key => name }}
-    stub_it request
+    stub_it :post, request
   end
   
   def self.disable(name)
     request = { "params" => { "action" => "disable" }, get_type => { get_nsname_key => name }}
-    stub_it request
+    stub_it :post, request
   end
   
   def self.rename(name,newname)
     request = { "params" => { "action" => "rename" }, get_type => { "new" + get_nsname_key => newname, get_nsname_key => name }}
-    stub_it request
+    stub_it :post, request
   end
 
   def self.delete(name)

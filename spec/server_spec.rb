@@ -12,30 +12,28 @@ class WebHTTPMockServer < WebHTTPMock
 
   def self.get_all
     stub_request( :get, "http://10.0.0.1/nitro/v1/config/#{get_type}").
-        with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/x-www-form-urlencoded', 'Cookie' => "sessionid=##CCD41760A2B71E88E029BC33F00E9C24704E71821EB86BD9A3AD2E5005C5"}).
+        with(:headers => @@headers).
         to_return({ :body => '{"errorcode": 0, "message": "Done", "server": [{"name": "srv1", "ipaddress": "1.1.1.1", "state": "ENABLED"}, {"name": "srv2", "ipaddress": "2.2.2.2", "state": "DISABLED"}] }', :status => 200, :headers => {'Content-Type' => 'application/json' }})
   end
   
   def self.update(name)
     request = { "sessionid" => "##CCD41760A2B71E88E029BC33F00E9C24704E71821EB86BD9A3AD2E5005C5", get_type => { get_nsname_key => name, "ipaddress" => "10.0.0.3" }}
+    
     stub_request( :put, "http://10.0.0.1/nitro/v1/config").
       with(:body => request.to_json,
-        :headers => {'Accept'=>'application/json', 'Content-Type'=>'application/x-www-form-urlencoded', 'Cookie'=>'sessionid=##CCD41760A2B71E88E029BC33F00E9C24704E71821EB86BD9A3AD2E5005C5'}).
+        :headers => @@headers).
       to_return(:status => 200, :body => '{"errorcode": 0, "message": "Done"}', :headers => {'Content-Type' => 'application/json'})
   end
 
   def self.find_by_name(name)
     stub_request( :get, "http://10.0.0.1/nitro/v1/config/#{get_type}/#{name}").
-        with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/x-www-form-urlencoded', 'Cookie' => "sessionid=##CCD41760A2B71E88E029BC33F00E9C24704E71821EB86BD9A3AD2E5005C5"}).
+        with(:headers => @@headers).
         to_return({ :body => '{"errorcode": 0, "message": "Done", "server": [{"name": "' + name + '", "ipaddress": "1.1.1.1", "state": "ENABLED"}] }', :status => 200, :headers => {'Content-Type' => 'application/json' }})
   end
   
   def self.add(name)
     request = { get_type => { "name" => name, "ipaddress" => "1.1.1.1", "state" => "ENABLED" }}
-    stub_request( :post, "http://10.0.0.1/nitro/v1/config").
-      with(:body => { "object" => request.to_json },
-        :headers => {'Accept'=>'application/json', 'Content-Type'=>'application/x-www-form-urlencoded'}).
-      to_return({ :body => '{"errorcode": 0, "message": "Done"}', :status => 200, :headers => {'Content-Type' => 'application/json' }})
+    stub_it :post, request
   end
 end
 
