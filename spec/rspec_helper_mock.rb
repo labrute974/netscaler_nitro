@@ -35,7 +35,7 @@ class WebHTTPMock
   end
   
   def self.rename(name,newname)
-    request = { "params" => { "action" => "rename" }, get_type => { "new" + get_nsname_key => newname, get_nsname_key => name }}
+    request = { "params" => { "action" => "rename" }, get_type => { "newname" => newname, get_nsname_key => name }}
     stub_it :post, request
   end
 

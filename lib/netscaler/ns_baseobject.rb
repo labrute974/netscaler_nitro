@@ -22,7 +22,12 @@ module Netscaler
     def rename!(newname)
       raise ArgumentError, "argument should be a String" unless newname.is_a? String
       
-      send_action("rename", { "new#{@nsname_key}" => newname })
+      if send_action("rename", { "newname" => newname })
+        @name = newname
+        true
+      else
+        false
+      end
     end
 
     def update!(params)
