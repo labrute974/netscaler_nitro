@@ -4,7 +4,7 @@ module Netscaler
       
     def initialize(nitro, name, options)
       required = ["servicetype"]
-      @options = ["servicetype", "maxclient", "cip", "cipHeader", "usip", "downstateflush", "sc", "sp", "srvtimeout", "clttimeout", "useproxyport", "tcpb", "comment", "state", "cmp", "maxreq", "appflowlog" ] 
+      @options = ["servicetype", "maxclient", "cip", "cipheader", "usip", "downstateflush", "sc", "sp", "srvtimeout", "clttimeout", "useproxyport", "tcpb", "comment", "state", "cmp", "maxreq", "appflowlog" ] 
       @type = "servicegroup"
       @nsname_key = "servicegroupname"
 
@@ -50,9 +50,11 @@ module Netscaler
     end
 
     def list_servers
-      result = @nitro.get("servicegroup_servicegroupmember_binding/#{@name}")["servicegroup_servicegroupmember_binding"]
+      result = @nitro.get("servicegroup_servicegroupmember_binding/#{@name}")
       
       if result
+        result = result.has_key?("servicegroup_servicegroupmember_binding") ? result["servicegroup_servicegroupmember_binding"] : []
+        
         result.each {|server| server.delete @nsname_key }
       end
       
@@ -75,6 +77,25 @@ module Netscaler
       attrs.each {|attr| raise ArgumentError, "the Hash doesn't have the required keys (arg:1) : should have #{attrs.to_s}" unless options.include? attr }
       
       send_action("disable", options)
+    end
+   
+    def update!(params)
+      raise ArgumentError, "argument must be a Hash" unless params.is_a? Hash
+      
+      immutable = "servicetype"
+      raise ArgumentError, "#{immutable} key is immutable" if params.has_key? immutable
+      
+      if params.has_key? "cip"
+        if params["cip"] == "ENABLED" and not params.has_key? "cipheader"
+          if @params.has_key? "cipheader"
+            params["cipheader"] = @params["cipheader"] if @params.has_key? "cipheader"
+          else params.has_key? "cipheader"
+            raise ArgumentError, 'key "cipheader" cannot exist without key "cip" set to "YES" and vice versa'
+          end
+        end
+      end
+    
+      super params
     end
    
     def self.get_options
