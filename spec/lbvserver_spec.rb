@@ -11,12 +11,12 @@ class WebHTTPMockLBVserver < WebHTTPMock
   end 
 
   def self.unbind(name)
-    request = { "params" => { "action" => "unbind" }, get_type => [{ "servicegroupname" => "sgtest", "lbvservername" => name }]}
+    request = { "params" => { "action" => "unbind" }, get_type => [{ "servicegroupname" => "sgtest", "name" => name }]}
     stub_it :post, request
   end
   
   def self.bind(name)
-    request = { "params" => { "action" => "bind" }, get_type => [{ "servicegroupname" => "sgtest", "lbvservername" => name }]}
+    request = { "params" => { "action" => "bind" }, get_type => [{ "servicegroupname" => "sgtest", "name" => name }, { "policyname" => "test", "priority" => "10", "name" => "lbvservertest" } ] }
     stub_it :post, request
   end
 
@@ -157,7 +157,7 @@ describe Netscaler::LBVserver do
     describe "#bind" do
       specify do
         WebHTTPMockLBVserver.bind lbvserver.name
-        options = [{ "servicegroupname" => "sgtest" }]
+        options = { "servicegroup" => [{ "servicegroupname" => "sgtest" }], "policy" => [{"policyname" => "test", "priority" => "10" }]}
         lbvserver.bind(options).should be_true
       end
     end
