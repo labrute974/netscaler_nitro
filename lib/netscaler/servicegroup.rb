@@ -28,11 +28,11 @@ module Netscaler
       raise ArgumentError, "argument must be an Array" unless options.is_a? Array
       
       required_attrs = ["servername", "port"]
-      avail_attrs = ["servername", "port", "serverid", "hashid", "weight"]
+      avail_attrs = ["serverid", "hashid", "weight"]
       
       options.each do |option|
         required_attrs.each {|attr| raise ArgumentError, "the Hash doesn't have the required keys (arg:1) : should have #{required_attrs.to_s}" unless option.include? attr }
-        option.keys.each {|k| raise ArgumentError, "unknown key (arg:1) : #{k}" unless avail_attrs.include? k}
+        option.keys.each {|k| raise ArgumentError, "unknown key (arg:1) : #{k}" unless avail_attrs.include?(k) or required_attrs.include?(k) }
       end
       
       send_action("bind", options)
