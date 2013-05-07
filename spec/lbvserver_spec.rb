@@ -165,7 +165,7 @@ describe Netscaler::LBVserver do
     describe "#unbind" do
       specify do
         WebHTTPMockLBVserver.unbind lbvserver.name
-        options = [{ "servicegroupname" => "sgtest" }]
+        options = { "servicegroup" => [{ "servicegroupname" => "sgtest" }]}
         lbvserver.unbind(options).should be_true
       end
     end
