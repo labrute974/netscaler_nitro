@@ -4,7 +4,7 @@ module Netscaler
 
     def initialize(nitro, name, options)
       required = ["servicetype"]
-      @options = [ "insertvserveripport", "ipv46", "port", "servicetype", "downstateflush", "disableprimaryondown", "lbmethod", "comment", "state", "appflowlog" ] 
+      @options = [ "insertvserveripport", "ipv46", "port", "servicetype", "downstateflush", "disableprimaryondown", "lbmethod", "comment", "state", "appflowlog", "curstate", "backupvserver", "sc", "pq", "sopersistence", "sessionless" ] 
       @type = "lbvserver"
       @nsname_key = "name"
 
@@ -21,8 +21,18 @@ module Netscaler
         @params[k] = v
       end
       
-      @params["state"] = "ENABLED" unless @params.has_key? "state"
+      @params["state"] =  @params["curstate"] == "OUT OF SERVICE" ? "DISABLED" : "ENABLED" if options.include?("curstate") and not options.include?("state")
     end
+    
+    def update!(params)
+      raise ArgumentError, "argument must be a Hash" unless params.is_a? Hash
+      
+      immutable = "port"
+      raise ArgumentError, "#{immutable} key is immutable" if params.has_key? immutable
+      
+      super params
+    end
+
     
     def list_bindings
       result = @nitro.get("lbvserver_binding/#{@name}")
@@ -58,9 +68,9 @@ module Netscaler
         v.each do |option|
           required_attrs.each {|attr| raise ArgumentError, "the Hash doesn't have the required keys (arg:1) : should have #{required_attrs.to_s}" unless option.include?(attr) }
           option.keys.each {|k| raise ArgumentError, "unknown key (arg:1) : #{k}" unless avail_attrs.include?(k) or required_attrs.include?(k) }
-          
-          params.concat v
         end
+        
+        params.concat v
       end
       
       send_action("bind", params)
@@ -82,16 +92,16 @@ module Netscaler
         v.each do |option|
           required_attrs.each {|attr| raise ArgumentError, "the Hash doesn't have the required keys (arg:1) : should have #{required_attrs.to_s}" unless option.include?(attr) }
           option.keys.each {|k| raise ArgumentError, "unknown key (arg:1) : #{k}" unless avail_attrs.include?(k) or required_attrs.include?(k) }
-          
-          params.concat v
         end
+        
+        params.concat v
       end
       
       send_action("unbind", params)
     end
 
     def self.get_options
-      [ "insertvserveripport", "ipv46", "port", "servicetype", "downstateflush", "disableprimaryondown", "lbmethod", "comment", "state", "appflowlog" ]
+      [ "insertvserveripport", "ipv46", "port", "servicetype", "downstateflush", "disableprimaryondown", "lbmethod", "comment", "state", "appflowlog", "curstate", "backupvserver", "sc", "pq", "sopersistence", "sessionless" ]
     end
     
     def self.get_type
