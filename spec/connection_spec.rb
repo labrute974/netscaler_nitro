@@ -13,7 +13,12 @@ describe Netscaler::Connection do
 
   context "when logged out" do
     describe "#logged_in?" do
-      it { @connection.should_not be_logged_in }
+      specify do
+        stub_request(:get, "http://10.0.0.1/nitro/v1/config/").
+  with(:headers => {'Accept'=>'application/json', 'Accept-Encoding'=>'gzip, deflate', 'Content-Type'=>'application/x-www-form-urlencoded'}).
+  to_return(:status => 200, :body => '{ "errorcode": 131, "message": "Session expired."}', :headers => {'Content-Type' => 'application/json' })
+        @connection.should_not be_logged_in
+      end
     end
 
     describe "#logout" do
@@ -32,7 +37,10 @@ describe Netscaler::Connection do
 
   context "when logged in" do
     describe "#logged_in?" do 
-      it do
+      specify do
+        stub_request(:get, "http://10.0.0.1/nitro/v1/config/").
+  with(:headers => {'Accept'=>'application/json', 'Accept-Encoding'=>'gzip, deflate', 'Content-Type'=>'application/x-www-form-urlencoded'}).
+  to_return(:status => 200, :body => '{ "errorcode": 0, "message": "Done"}', :headers => {'Content-Type' => 'application/json' })
         @connection.should be_logged_in
       end
     end

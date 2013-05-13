@@ -129,7 +129,11 @@ module Netscaler
     end
 
     def logged_in?
-      return ! @sessionid.nil?
+      if get ""
+        true
+      else
+        false
+      end
     end
   end
 end
