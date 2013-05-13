@@ -80,7 +80,7 @@ describe Netscaler::ServiceGroup do
   describe "#self.find_by_name" do
    specify do
      WebHTTPMockServiceGroup.find_by_name sgname
-     Netscaler::ServiceGroup.find_by_name(connection, sgname).should be_an_instance_of Netscaler::ServiceGroup
+     Netscaler::ServiceGroup.find_by_name(connection, sgname).should be_an_instance_of Hash
    end
   end
 
@@ -90,7 +90,7 @@ describe Netscaler::ServiceGroup do
       WebHTTPMockServiceGroup.find_by_name sgname
       
       options = {"appflowlog" => "ENABLED", "servicetype" => "HTTP"}
-      Netscaler::ServiceGroup.add(connection, sgname, options).should be_an_instance_of Netscaler::ServiceGroup
+      Netscaler::ServiceGroup.add(connection, sgname, options).should be_an_instance_of Hash
     end
   end
   

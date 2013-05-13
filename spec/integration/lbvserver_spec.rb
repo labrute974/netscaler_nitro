@@ -12,11 +12,11 @@ describe Netscaler::LBVserver do
   end
 
   describe ".add" do
-    specify { Netscaler::LBVserver.add(connection, lbvserver_name, params).should be_an_instance_of Netscaler::LBVserver }
+    specify { Netscaler::LBVserver.add(connection, lbvserver_name, params).should be_an_instance_of Hash }
   end
   
   context "when Netscaler::LBVserver instanciated" do
-    let(:lbvserver) { Netscaler::LBVserver.find_by_name(connection, lbvserver_name) }
+    let(:lbvserver) { object = Netscaler::LBVserver.get_object_by_name(connection, lbvserver_name); }
     
     describe "#enable!" do
       specify { lbvserver.enable!.should be_true }
@@ -40,7 +40,6 @@ describe Netscaler::LBVserver do
     
     
     context "when binding servers to LBVserver" do
-      let(:lbvserver) { Netscaler::LBVserver.find_by_name(connection, lbvserver_name) }
       let(:sg1) { "rspec_sg_1" }
       let(:sg2) { "rspec_sg_2" }
       

@@ -56,7 +56,7 @@ describe Netscaler::Server do
   describe "#self.find_by_name" do
    specify do
      WebHTTPMockServer.find_by_name servername
-     Netscaler::Server.find_by_name(connection, servername).should be_an_instance_of Netscaler::Server
+     Netscaler::Server.find_by_name(connection, servername).should be_an_instance_of Hash
    end
   end
 
@@ -73,7 +73,7 @@ describe Netscaler::Server do
       WebHTTPMockServer.find_by_name servername
       
       options = {"ipaddress" => "1.1.1.1", "state" => "ENABLED"}
-      Netscaler::Server.add(connection, servername, options).should be_an_instance_of Netscaler::Server
+      Netscaler::Server.add(connection, servername, options).should be_an_instance_of Hash
     end
   end
   

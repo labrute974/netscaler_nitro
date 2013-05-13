@@ -70,7 +70,7 @@ describe Netscaler::LBVserver do
   describe "#self.find_by_name" do
    specify do
      WebHTTPMockLBVserver.find_by_name lbvsvrname
-     Netscaler::LBVserver.find_by_name(connection, lbvsvrname).should be_an_instance_of Netscaler::LBVserver
+     Netscaler::LBVserver.find_by_name(connection, lbvsvrname).should be_an_instance_of Hash
    end
   end
 
@@ -80,7 +80,7 @@ describe Netscaler::LBVserver do
       WebHTTPMockLBVserver.find_by_name lbvsvrname
       
       options = {"appflowlog" => "ENABLED", "servicetype" => "HTTP"}
-      Netscaler::LBVserver.add(connection, lbvsvrname, options).should be_an_instance_of Netscaler::LBVserver
+      Netscaler::LBVserver.add(connection, lbvsvrname, options).should be_an_instance_of Hash
     end
   end
   

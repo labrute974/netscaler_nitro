@@ -63,7 +63,6 @@ module Netscaler
     
     def self.find_by_name(nitro, name)
       response = nitro.get(get_type + '/' + name)
-
       response = response[get_type] if response
       
       if response
@@ -71,12 +70,20 @@ module Netscaler
         resource = response[0]
         self.get_options.each {|opt| options[opt] = resource[opt] if resource.has_key? opt}
         
-        value = eval(self.name).new(nitro, name, options)
+        options.merge!({ "name" => name })
       else
-        value = nil
+        nil
       end
-      
-      return value
+    end
+
+    def self.get_object_by_name(nitro, name)
+      object = find_by_name(nitro, name)
+      if object
+	object.delete "name"
+        eval(self.name).new(nitro, name, object)
+      else
+        false
+      end
     end
     
     def self.get_all(nitro)

@@ -12,11 +12,11 @@ describe Netscaler::ServiceGroup do
   end
 
   describe "#self.add" do
-    specify { Netscaler::ServiceGroup.add(connection, sg_name, params).should be_an_instance_of Netscaler::ServiceGroup }
+    specify { Netscaler::ServiceGroup.add(connection, sg_name, params).should be_an_instance_of Hash }
   end
   
   context "when Netscaler::ServiceGroup instanciated" do
-    let(:servicegroup) { Netscaler::ServiceGroup.find_by_name(connection, sg_name) }
+    let(:servicegroup) { Netscaler::ServiceGroup.get_object_by_name(connection, sg_name) }
     
     describe "#enable!" do
       specify { servicegroup.enable!.should be_true }
@@ -40,7 +40,6 @@ describe Netscaler::ServiceGroup do
     
     
     context "when binding servers to ServiceGroup" do
-      let(:servicegroup) { Netscaler::ServiceGroup.find_by_name(connection, sg_name) }
       let(:srv1) { "rspec_server_1" }
       let(:srv2) { "rspec_server_2" }
       
@@ -50,8 +49,8 @@ describe Netscaler::ServiceGroup do
       
       describe "#bind" do
         it "should create two servers and bind them" do
-          Netscaler::Server.add(connection, srv1, { "ipaddress" => "1.1.1.1", "comment" => "Rspec Test binding servers to ServiceGroup" })
-          Netscaler::Server.add(connection, srv2, { "ipaddress" => "1.1.1.2", "comment" => "Rspec Test binding servers to ServiceGroup" })
+          Netscaler::Server.add(connection, srv1, { "ipaddress" => "2.1.1.1", "comment" => "Rspec Test binding servers to ServiceGroup" })
+          Netscaler::Server.add(connection, srv2, { "ipaddress" => "2.2.1.1", "comment" => "Rspec Test binding servers to ServiceGroup" })
           
           servicegroup.bind([{ "servername" => srv1, "port" => "80" }, { "servername" => srv2, "port" => "80" }]).should be_true
         end

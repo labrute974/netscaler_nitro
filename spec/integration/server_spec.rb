@@ -12,7 +12,7 @@ describe Netscaler::Server do
   end
 
   describe "#self.add" do
-    specify { Netscaler::Server.add(connection, server_name, params).should be_an_instance_of Netscaler::Server }
+    specify { Netscaler::Server.add(connection, server_name, params).should be_an_instance_of Hash }
   end
   
   context "before doing update / rename operation" do
@@ -22,7 +22,7 @@ describe Netscaler::Server do
   end
   
   context "when Netscaler::Server instanciated" do
-    let(:server) { Netscaler::Server.find_by_name(connection, server_name) }
+    let(:server) { Netscaler::Server.get_object_by_name(connection, server_name) }
     
     describe "#enable!" do
       specify { server.enable!.should be_true }
