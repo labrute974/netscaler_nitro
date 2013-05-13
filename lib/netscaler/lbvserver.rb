@@ -21,7 +21,11 @@ module Netscaler
         @params[k] = v
       end
       
-      @params["state"] =  @params["curstate"] == "OUT OF SERVICE" ? "DISABLED" : "ENABLED" if options.include?("curstate") and not options.include?("state")
+      if options.include?("curstate") and not options.include?("state")
+        @params["state"] =  @params["curstate"] == "OUT OF SERVICE" ? "DISABLED" : "ENABLED"
+      elsif not options.include?("state")
+        @params["state"] = "ENABLED"
+      end
     end
     
     def update!(params)
