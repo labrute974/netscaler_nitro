@@ -27,11 +27,11 @@ module Netscaler
     
     def self.find_by_ip(nitro, ip)
       objects = get_all(nitro)
-      object = nil
+      object = {}
       
       if objects
         objects.each do |obj|
-          if obj.params["ipaddress"] == ip
+          if obj["ipaddress"] == ip
             object = obj
             break
           end

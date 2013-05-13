@@ -91,7 +91,7 @@ module Netscaler
             options[opt] = obj[opt] if obj.has_key? opt
           end
           
-          eval(self.name).new(nitro, obj[get_nsname_key], options)
+          options.merge!({"name" => obj[get_nsname_key]})
         end
       else
         objects = false

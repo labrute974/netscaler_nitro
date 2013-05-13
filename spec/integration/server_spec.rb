@@ -17,7 +17,7 @@ describe Netscaler::Server do
   
   context "before doing update / rename operation" do
     describe "#self.find_by_ip" do
-      specify { Netscaler::Server.find_by_ip(connection, params["ipaddress"]).should be_an_instance_of Netscaler::Server }
+      specify { Netscaler::Server.find_by_ip(connection, params["ipaddress"]).should be_an_instance_of Hash }
     end
   end
   
@@ -51,7 +51,7 @@ describe Netscaler::Server do
   
   context "after doing update / rename operation" do
     describe "#self.find_by_ip" do
-      specify { Netscaler::Server.find_by_ip(connection, new_ip).name.should be_eql new_server_name }
+      specify { Netscaler::Server.find_by_ip(connection, new_ip)["name"].should be_eql new_server_name }
     end
   end
   

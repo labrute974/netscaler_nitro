@@ -63,7 +63,7 @@ describe Netscaler::Server do
  describe "#self.find_by_ip" do
    specify do  
       WebHTTPMockServer.get_all
-      Netscaler::Server.find_by_ip(connection, "1.1.1.1").should be_an_instance_of Netscaler::Server
+      Netscaler::Server.find_by_ip(connection, "1.1.1.1").should be_an_instance_of Hash
    end
   end
   
